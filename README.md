@@ -8,7 +8,8 @@
 | --- | --- |
 | 앱 버전 | 1.3.0 |
 | 패키지 | `com.toss.cardapp` |
-| 대상 환경 | 토스프론트 PLF02WH / LineageOS 13 |
+| 대상 기기 | 토스프론트 PLF02WH |
+| 이 브랜치의 서비스 검증 환경 | LineageOS 18.1 (Android 11), 커널 `4.19.193-ab761` |
 | 필수 구성 | 없음. Magisk 모듈 없이 리더에 직접 연결합니다. 순정 Sunmi 결제 하드웨어 서비스가 있으면 그 서비스를 사용합니다. |
 | 배포 파일 | `toss-front-card-app-1.3.0.apk` |
 
@@ -31,6 +32,12 @@
 3. **둘 다 없을 때**: 앱이 리더의 보안 프로세서(SP)와 UART `/dev/ttyS3`로 직접 통신합니다. 통신 규격은 [docs/sp_protocol.md](docs/sp_protocol.md)에 정리했습니다.
 
 두 경로 모두 같은 화면과 기록 기능을 사용합니다. 직접 연결은 서비스가 없는 상태의 토스프론트 실기기에서 IC 삽입 감지, ATR·APDU 읽기, 마그네틱 읽기로 확인했습니다.
+
+### PLF02WH LineageOS 18.1의 UART 수정
+
+실기기의 LineageOS 빌드 `18.1-20240121-UNOFFICIAL-arm64_bvS`에서는 `stty raw`가 입력 변환 플래그를 켰습니다. `IUCLC`와 `IEXTEN`이 함께 켜지면서 정상 연결 응답 `0x41`(`A`)이 `0x61`(`a`)로 변환됐고 리더 연결이 실패했습니다. [Linux 4.19 입력 처리 코드](https://github.com/torvalds/linux/blob/v4.19/drivers/tty/n_tty.c#L1463-L1471)
+
+앱과 서비스가 공유하는 `reader` 모듈은 UART를 열 때마다 921600 baud·8N1로 설정한 뒤 입력·출력·로컬 처리 플래그를 직접 0으로 설정합니다. 카드 리더 앱 1.3.0과 수정한 서비스 `1.0.2-uart.1` 조합에서 재부팅 후 서비스 자동 시작, UART 연결, IC 카드 감지, ATR 수신, APDU 교환을 실기기로 확인했습니다. [서비스 검증 기록](https://github.com/kimsaandev/Toss-CardReader-Service/blob/main/README.md#lineageos-181에서-uart를-수정한-이유)
 
 ### 안전 범위
 
