@@ -4,7 +4,21 @@
 >
 > 저는 이 기기를 아이들 장난감으로 쓰기 위해 커스텀했습니다.
 
-LineageOS 18.1에서 발생하는 연결 증상, 기존 버전과의 차이, 재부팅 후 실기기 검증 결과는 UART 수정 브랜치에 정리했습니다. [LineageOS 18.1 UART 수정 브랜치](https://github.com/kimsaandev/Toss-CardReader/tree/fix/plf02wh-lineage18-uart)
+## PLF02WH용 UART 수정 버전
+
+### 기존 버전과의 차이
+
+- **기존 서비스 `1.0.2`**는 UART를 열 때 `stty raw`를 실행합니다. 검증한 LineageOS 18.1(Android 11) 빌드에서는 이 명령이 문자 변환 옵션을 켜서 정상 응답 `0x41`(`A`)이 `0x61`(`a`)로 바뀌고 리더 연결이 실패했습니다.
+- **수정 서비스 `1.0.2-uart.1`**은 UART를 열 때마다 문자 변환 옵션을 명시적으로 끕니다. 서비스 APK만 교체해 적용했으며, 재부팅 후 서비스 자동 시작과 IC 카드 감지, 칩 초기 응답(ATR), APDU 교환을 실기기에서 확인했습니다.
+
+### 이 버전을 사용할 때
+
+토스 프런트 1.5세대(PLF02WH)에 LineageOS 18.1을 설치한 뒤 아래 증상이 나타날 때 사용하세요.
+
+- 카드 리더 서비스가 실행된 상태에서 앱이 **리더 서비스에 연결하는 중** 화면에 머물고, 로그에 `unexpected link reply`가 반복됩니다.
+- UART 설정을 수동으로 바꾸면 카드가 인식되고, 재부팅 후 같은 연결 문제가 다시 발생합니다.
+
+수정 코드와 상세 검증 기록은 전용 브랜치에 있습니다. [LineageOS 18.1 UART 수정 브랜치](https://github.com/kimsaandev/Toss-CardReader/tree/fix/plf02wh-lineage18-uart)
 
 토스프론트의 IC·마그네틱 리더로 카드를 읽고, 회원 확인과 출입 기록에 활용하는 Android 앱입니다.
 
